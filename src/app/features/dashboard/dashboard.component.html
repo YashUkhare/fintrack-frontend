@@ -1,0 +1,168 @@
+<div class="p-6 space-y-6 animate-fade-in">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">
+                Welcome back! Here's your financial overview
+            </p>
+        </div>
+        <div class="flex gap-3">
+            <button (click)="downloadPdf()" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600
+                         rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors
+                         flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div *ngFor="let i of [1,2,3,4]" class="bg-white dark:bg-gray-800 rounded-xl p-6 animate-pulse">
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-4"></div>
+            <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-2"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div *ngIf="!loading && analytics" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Income -->
+        <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 
+                    rounded-xl p-6 border border-green-200 dark:border-green-800
+                    transform hover:scale-105 transition-transform duration-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-green-500 rounded-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                    </svg>
+                </div>
+                <span class="text-xs font-medium text-green-600 dark:text-green-400 bg-green-200 dark:bg-green-900 
+                         px-2 py-1 rounded-full">+12.5%</span>
+            </div>
+            <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Income</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                ${{ analytics.totalIncome | number: '1.2-2'}}
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">This month</p>
+        </div>
+
+        <!-- Total Expense -->
+        <div class="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 
+                    rounded-xl p-6 border border-red-200 dark:border-red-800
+                    transform hover:scale-105 transition-transform duration-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-red-500 rounded-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 13l-5 5m0 0l-5-5m5 5V6" />
+                    </svg>
+                </div>
+                <span class="text-xs font-medium text-red-600 dark:text-red-400 bg-red-200 dark:bg-red-900 
+                         px-2 py-1 rounded-full">
+                    {{analytics.monthlyComparison.changePercentage > 0 ? '+' : ''}}
+                    {{analytics.monthlyComparison.changePercentage | number:'1.1-1'}}%
+                </span>
+            </div>
+            <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Expense</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                ${{ analytics.totalExpense | number: '1.2-2'}}
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">This month</p>
+        </div>
+
+        <!-- Net Savings -->
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 
+                    rounded-xl p-6 border border-blue-200 dark:border-blue-800
+                    transform hover:scale-105 transition-transform duration-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-blue-500 rounded-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+            <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Net Savings</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                ${{ analytics.netSavings | number: '1.2-2'}}
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                {{analytics.savingsRate | number:'1.1-1'}}% savings rate
+            </p>
+        </div>
+
+        <!-- Transactions -->
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 
+                    rounded-xl p-6 border border-purple-200 dark:border-purple-800
+                    transform hover:scale-105 transition-transform duration-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-purple-500 rounded-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </div>
+            </div>
+            <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Transactions</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{analytics.transactionCount}}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">This month</p>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div *ngIf="!loading && analytics" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Income vs Expense Trend -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Income vs Expense Trend
+            </h3>
+            <apx-chart [series]="trendChartOptions.series" [chart]="trendChartOptions.chart"
+                [xaxis]="trendChartOptions.xaxis" [stroke]="trendChartOptions.stroke"
+                [colors]="trendChartOptions.colors" [dataLabels]="trendChartOptions.dataLabels"
+                [legend]="trendChartOptions.legend" [grid]="trendChartOptions.grid"></apx-chart>
+        </div>
+
+        <!-- Category Spending -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Category-wise Spending
+            </h3>
+            <apx-chart [series]="categoryChartOptions.series" [chart]="categoryChartOptions.chart"
+                [labels]="categoryChartOptions.labels" [colors]="categoryChartOptions.colors"
+                [legend]="categoryChartOptions.legend" [responsive]="categoryChartOptions.responsive"></apx-chart>
+        </div>
+    </div>
+
+    <!-- AI Insights -->
+    <div *ngIf="!loading && analytics && analytics.aiInsights.length > 0"
+        class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            AI-Powered Insights
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div *ngFor="let insight of analytics.aiInsights.slice(0, 4)"
+                class="p-4 rounded-lg border-l-4 transition-all hover:shadow-md" [ngClass]="{
+                 'bg-blue-50 dark:bg-blue-900/20 border-blue-500': insight.type === 'SPENDING_PATTERN',
+                 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500': insight.type === 'SAVINGS_OPPORTUNITY',
+                 'bg-red-50 dark:bg-red-900/20 border-red-500': insight.type === 'UNUSUAL_SPENDING',
+                 'bg-green-50 dark:bg-green-900/20 border-green-500': insight.type === 'SAVINGS_TIP'
+               }">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-1">{{insight.title}}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{insight.message}}</p>
+                <p *ngIf="insight.actionable" class="text-xs text-gray-500 dark:text-gray-500 italic">
+                    💡 {{insight.recommendation}}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

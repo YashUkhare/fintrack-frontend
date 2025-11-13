@@ -1,0 +1,222 @@
+<div class="p-6 space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Budgets</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Set and track your spending limits</p>
+        </div>
+        <button (click)="openModal()" class="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg
+                       transition-all flex items-center gap-2 shadow-lg hover:shadow-xl">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Create Budget
+        </button>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let i of [1,2,3]" class="bg-white dark:bg-gray-800 rounded-xl p-6 animate-pulse">
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-4"></div>
+            <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+        </div>
+    </div>
+
+    <!-- Budgets Grid -->
+    <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let budget of budgets" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4 transition-all
+                    hover:shadow-xl hover:scale-[1.02] cursor-pointer" [ngClass]="{
+               'border-green-500': budget.status === 'ACTIVE' && budget.usagePercentage < 80,
+               'border-yellow-500': budget.usagePercentage >= 80 && budget.usagePercentage < 100,
+               'border-red-500': budget.status === 'EXCEEDED'
+             }">
+            <!-- Header -->
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{budget.categoryName}}
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{budget.startDate | date:'MMM dd'}} - {{budget.endDate | date:'MMM dd, yyyy'}}
+                    </p>
+                </div>
+                <span class="px-2 py-1 text-xs font-medium rounded-full" [ngClass]="{
+                    'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400': budget.status === 'ACTIVE',
+                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': budget.status === 'EXCEEDED',
+                    'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400': budget.status === 'COMPLETED'
+                  }">
+                    {{budget.status}}
+                </span>
+            </div>
+
+            <!-- Amount Info -->
+            <div class="mb-4">
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="text-gray-600 dark:text-gray-400">Spent</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        ${{ budget.spentAmount | number: '1.2-2'}} / ${{ budget.amount | number: '1.2-2'}}
+                    </span>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <div class="h-full transition-all duration-300 rounded-full"
+                        [style.width.%]="Math.min(budget.usagePercentage, 100)" [ngClass]="{
+                     'bg-green-500': budget.usagePercentage < 80,
+                     'bg-yellow-500': budget.usagePercentage >= 80 && budget.usagePercentage < 100,
+                     'bg-red-500': budget.usagePercentage >= 100
+                   }"></div>
+                </div>
+
+                <div class="flex justify-between text-xs mt-1">
+                    <span [ngClass]="{
+                'text-green-600 dark:text-green-400': budget.usagePercentage < 80,
+                'text-yellow-600 dark:text-yellow-400': budget.usagePercentage >= 80 && budget.usagePercentage < 100,
+                'text-red-600 dark:text-red-400': budget.usagePercentage >= 100
+              }">
+                        {{budget.usagePercentage | number:'1.1-1'}}% used
+                    </span>
+                    <span class="text-gray-600 dark:text-gray-400">
+                        ${{ budget.remainingAmount | number: '1.2-2'}} remaining
+                    </span>
+                </div>
+            </div>
+
+            <!-- Alert Threshold -->
+            <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="flex items-center gap-2 text-sm">
+                    <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span class="text-gray-600 dark:text-gray-400">
+                        Alert at {{budget.alertThreshold}}%
+                        <span *ngIf="budget.alertSent" class="ml-1 text-red-500">(Sent)</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2">
+                <button (click)="editBudget(budget); $event.stopPropagation()" class="flex-1 px-4 py-2 text-sm border border-gray-300 dark:border-gray-600
+                           rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    Edit
+                </button>
+                <button (click)="deleteBudget(budget.id); $event.stopPropagation()" class="flex-1 px-4 py-2 text-sm border border-red-300 dark:border-red-600
+                           text-red-600 dark:text-red-400 rounded-lg
+                           hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                    Delete
+                </button>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="budgets.length === 0" class="col-span-full text-center py-16 bg-white dark:bg-gray-800 rounded-xl">
+            <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">No budgets yet</h3>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                Get started by creating your first budget to track spending.
+            </p>
+            <button (click)="openModal()"
+                class="mt-6 px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg">
+                Create Budget
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Budget Modal -->
+<div *ngIf="showModal" class="fixed inset-0 z-50 overflow-y-auto" (click)="closeModal()">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div (click)="$event.stopPropagation()"
+            class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+            <form [formGroup]="budgetForm" (ngSubmit)="onSubmit()">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{editingBudget ? 'Edit Budget' : 'Create Budget'}}
+                    </h3>
+                </div>
+
+                <div class="px-6 py-4 space-y-4">
+                    <!-- Category -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Category
+                        </label>
+                        <select formControlName="categoryId" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                               focus:ring-2 focus:ring-primary-500">
+                            <option value="">Select category</option>
+                            <option *ngFor="let cat of expenseCategories" [value]="cat.id">
+                                {{cat.name}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Amount -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Budget Amount
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                            <input type="number" formControlName="amount" placeholder="0.00" class="w-full pl-8 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                                bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                focus:ring-2 focus:ring-primary-500">
+                        </div>
+                    </div>
+
+                    <!-- Date Range -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Start Date
+                            </label>
+                            <input type="date" formControlName="startDate" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                                bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                End Date
+                            </label>
+                            <input type="date" formControlName="endDate" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                                bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                focus:ring-2 focus:ring-primary-500">
+                        </div>
+                    </div>
+
+                    <!-- Alert Threshold -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Alert Threshold (%)
+                        </label>
+                        <input type="number" formControlName="alertThreshold" placeholder="80" min="0" max="100" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                              bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                              focus:ring-2 focus:ring-primary-500">
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            You'll be notified when spending reaches this percentage
+                        </p>
+                    </div>
+                </div>
+
+                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex gap-3 justify-end">
+                    <button type="button" (click)="closeModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                             hover:bg-gray-100 dark:hover:bg-gray-700">
+                        Cancel
+                    </button>
+                    <button type="submit" [disabled]="budgetForm.invalid || saving" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg
+                             disabled:bg-gray-300 disabled:cursor-not-allowed">
+                        {{saving ? 'Saving...' : (editingBudget ? 'Update' : 'Create')}}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

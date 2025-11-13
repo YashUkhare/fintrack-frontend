@@ -1,0 +1,234 @@
+<div class="p-6 space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Financial Goals</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Track your savings and financial targets</p>
+        </div>
+        <button (click)="openModal()" class="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg
+                       transition-all flex items-center gap-2 shadow-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Create Goal
+        </button>
+    </div>
+
+    <!-- Goals Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let goal of goals"
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 hover:shadow-xl transition-all">
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/30 
+                          flex items-center justify-center text-2xl">
+                        {{goal.icon || '🎯'}}
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 dark:text-white">{{goal.name}}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Target: {{goal.targetDate | date:'MMM yyyy'}}
+                        </p>
+                    </div>
+                </div>
+                <span class="px-2 py-1 text-xs font-medium rounded-full" [ngClass]="{
+                    'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400': goal.status === 'IN_PROGRESS',
+                    'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400': goal.status === 'COMPLETED',
+                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': goal.status === 'OVERDUE'
+                  }">
+                    {{goal.status.replace('_', ' ')}}
+                </span>
+            </div>
+
+            <!-- Description -->
+            <p *ngIf="goal.description" class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                {{goal.description}}
+            </p>
+
+            <!-- Progress Circle -->
+            <div class="relative w-32 h-32 mx-auto mb-4">
+                <svg class="transform -rotate-90 w-32 h-32">
+                    <circle cx="64" cy="64" r="56" stroke="currentColor" class="text-gray-200 dark:text-gray-700"
+                        stroke-width="8" fill="none" />
+                    <circle cx="64" cy="64" r="56" stroke="currentColor" [attr.stroke-dasharray]="2 * Math.PI * 56"
+                        [attr.stroke-dashoffset]="2 * Math.PI * 56 * (1 - goal.progressPercentage / 100)" [ngClass]="{
+                        'text-blue-500': goal.progressPercentage < 50,
+                        'text-yellow-500': goal.progressPercentage >= 50 && goal.progressPercentage < 100,
+                        'text-green-500': goal.progressPercentage >= 100
+                      }" stroke-width="8" fill="none" class="transition-all duration-500" />
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white">
+                            {{goal.progressPercentage | number:'1.0-0'}}%
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Complete</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amount Info -->
+            <div class="space-y-2 mb-4">
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600 dark:text-gray-400">Current</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        ${{ goal.currentAmount | number: '1.2-2'}}
+                    </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600 dark:text-gray-400">Target</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        ${{ goal.targetAmount | number: '1.2-2'}}
+                    </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600 dark:text-gray-400">Remaining</span>
+                    <span class="font-semibold text-primary-600 dark:text-primary-400">
+                        ${{ goal.remainingAmount | number: '1.2-2'}}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2">
+                <button *ngIf="goal.status === 'IN_PROGRESS'" (click)="addProgress(goal)"
+                    class="flex-1 px-4 py-2 text-sm bg-primary-500 hover:bg-primary-600 text-white rounded-lg">
+                    Add Progress
+                </button>
+                <button (click)="editGoal(goal)" class="flex-1 px-4 py-2 text-sm border border-gray-300 dark:border-gray-600
+                           rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                    Edit
+                </button>
+                <button (click)="deleteGoal(goal.id)" class="px-4 py-2 text-sm border border-red-300 dark:border-red-600
+                           text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                    Delete
+                </button>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="goals.length === 0" class="col-span-full text-center py-16 bg-white dark:bg-gray-800 rounded-xl">
+            <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">No goals yet</h3>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                Start achieving your financial dreams by creating your first goal.
+            </p>
+            <button (click)="openModal()"
+                class="mt-6 px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg">
+                Create Goal
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Goal Modal -->
+<div *ngIf="showModal" class="fixed inset-0 z-50 overflow-y-auto" (click)="closeModal()">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+        <div (click)="$event.stopPropagation()"
+            class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+            <form [formGroup]="goalForm" (ngSubmit)="onSubmit()">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{editingGoal ? 'Edit Goal' : 'Create Goal'}}
+                    </h3>
+                </div>
+                <div class="px-6 py-4 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Goal Name
+                        </label>
+                        <input type="text" formControlName="name" placeholder="e.g., Emergency Fund" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                              bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                              focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Description
+                        </label>
+                        <textarea formControlName="description" rows="2" placeholder="What's this goal for?" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                                 bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                 focus:ring-2 focus:ring-primary-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Target Amount
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                            <input type="number" formControlName="targetAmount" placeholder="0.00" class="w-full pl-8 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                                bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                focus:ring-2 focus:ring-primary-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Target Date
+                        </label>
+                        <input type="date" formControlName="targetDate" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                              bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                              focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Icon (Emoji)
+                        </label>
+                        <input type="text" formControlName="icon" placeholder="🎯" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                              bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                              focus:ring-2 focus:ring-primary-500">
+                    </div>
+                </div>
+                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex gap-3 justify-end">
+                    <button type="button" (click)="closeModal()"
+                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg">
+                        Cancel
+                    </button>
+                    <button type="submit" [disabled]="goalForm.invalid || saving" class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg
+                             disabled:bg-gray-300">
+                        {{saving ? 'Saving...' : (editingGoal ? 'Update' : 'Create')}}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Modal -->
+<div *ngIf="showProgressModal" class="fixed inset-0 z-50 overflow-y-auto" (click)="closeProgressModal()">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+        <div (click)="$event.stopPropagation()"
+            class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Add Progress to {{selectedGoal?.name}}
+            </h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Amount to Add
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                        <input type="number" [(ngModel)]="progressAmount" placeholder="0.00" class="w-full pl-8 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                              bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                              focus:ring-2 focus:ring-primary-500">
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button (click)="closeProgressModal()"
+                        class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg">
+                        Cancel
+                    </button>
+                    <button (click)="submitProgress()"
+                        class="flex-1 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg">
+                        Add Progress
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
