@@ -137,7 +137,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
         <!-- Footer -->
         <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-8">
-          © 2024 FinTrack. All rights reserved.
+          © 2025 FinTrack. All rights reserved.
         </p>
       </div>
     </div>
